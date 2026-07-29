@@ -1,11 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QAction>
+#include <QCloseEvent>
 #include <QDateTime>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMenu>
 
 #include "tunnelview.h"
 
@@ -27,6 +30,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     ui->addTunnelButton->setText(tr("addTunnel"));
     connect(ui->addTunnelButton, &QPushButton::clicked, this, &MainWindow::onAddTunnel);
     loadTunnelData();
+    initTray();
 }
 
 MainWindow::~MainWindow()
@@ -34,6 +38,12 @@ MainWindow::~MainWindow()
     saveTunnelData();
 
     delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    this->hide();
+    event->ignore();
 }
 
 void MainWindow::onAddTunnel()
@@ -61,7 +71,7 @@ void MainWindow::loadTunnelData()
     QJsonArray sshTunnelData = rootObj[SSH_TUNNEL_DATA_KEY].toArray();
     for (const auto& tunnelData : sshTunnelData)
     {
-        QJsonObject tunnelObj = tunnelData.toObject();
+        QJsonObject tunnelObj  = tunnelData.toObject();
         TunnelView* tunnelView = new TunnelView(this);
         tunnelView->load(tunnelObj);
         ui->tunnelViewLayout->addWidget(tunnelView);
@@ -101,4 +111,27 @@ void MainWindow::saveTunnelData()
         file.write(doc.toJson(QJsonDocument::Indented));
     }
     file.close();
+}
+
+void MainWindow::initTray()
+{
+    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setIcon(QIcon(":/img/icon.png"));
+
+    QMenu* trayMenu     = new QMenu(this);
+    QAction* quitAction = new QAction(tr("quit"), this);
+    trayMenu->addAction(quitAction);
+    trayIcon->setContextMenu(trayMenu);
+
+    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
+    connect(trayIcon, &QSystemTrayIcon::activated, this, [=](QSystemTrayIcon::ActivationReason reason)
+            {
+                if (reason == QSystemTrayIcon::DoubleClick)
+                {
+                    this->showNormal();
+                    this->activateWindow();
+                }
+            });
+
+    trayIcon->show();
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 namespace Ui
 {
@@ -15,10 +16,16 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
+protected:
+    void closeEvent(QCloseEvent* event) override;
+
 private:
-    void onAddTunnel();
     void loadTunnelData();
     void saveTunnelData();
+    void initTray();
+
+private slots:
+    void onAddTunnel();
 
 private:
     Ui::MainWindow* ui;
