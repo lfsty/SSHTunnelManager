@@ -53,11 +53,7 @@ jobs:
         shell: pwsh
         env: 
           TAG_NAME: ${{ github.ref_name }}
-        run: |
-          New-Item -ItemType Directory -Path package
-          Copy-Item build/code/Release/*.exe package/
-          windeployqt --qmldir . package/SSHTunnelManager.exe
-          Compress-Archive -Path package/* -DestinationPath "SSHTunnelManager-windows-${env:TAG_NAME}.zip"
+        run: ./scripts/windows-pack.ps1
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v3
