@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TunnelView</class>
+ <widget class="QWidget" name="TunnelView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>479</width>
+    <height>59</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QLabel" name="userNameLabel">
+     <property name="text">
+      <string>user</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="serverIPLabel">
+     <property name="text">
+      <string>server</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="serverPortLabel">
+     <property name="text">
+      <string>port</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="startTunnelButton">
+     <property name="text">
+      <string>Run</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="managerButton">
+     <property name="text">
+      <string>Manager</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="deleteButton">
+     <property name="minimumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>30</width>
+       <height>30</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>X</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

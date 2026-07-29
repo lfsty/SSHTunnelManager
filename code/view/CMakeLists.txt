@@ -5,6 +5,12 @@ set(MODULE_NAME view)
 
 set(SOURCES_LIST
     ${CMAKE_CURRENT_LIST_DIR}/src/mainwindow.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tunnelview.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tunnelview.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/tunnelsetupdialog.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tunnelsetupdialog.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/forwardsetup.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/forwardsetup.h
 )
 
 set(HEADERS_LIST
@@ -13,6 +19,9 @@ set(HEADERS_LIST
 
 set(UI_LIST
     ${CMAKE_CURRENT_LIST_DIR}/ui/mainwindow.ui
+    ${CMAKE_CURRENT_LIST_DIR}/ui/tunnelview.ui
+    ${CMAKE_CURRENT_LIST_DIR}/ui/tunnelsetupdialog.ui
+    ${CMAKE_CURRENT_LIST_DIR}/ui/forwardsetup.ui
 )
 
 add_library(${MODULE_NAME} STATIC
