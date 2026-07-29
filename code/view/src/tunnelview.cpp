@@ -2,6 +2,7 @@
 #include "ui_tunnelview.h"
 
 #include <QJsonObject>
+#include <QMessageBox>
 
 #include <tunnel.h>
 #include "tunnelsetupdialog.h"
@@ -20,8 +21,12 @@ TunnelView::TunnelView(QWidget* parent) : QWidget(parent),
     ui->managerButton->setText(tr("Setup"));
     connect(ui->managerButton, &QPushButton::clicked, this, &TunnelView::onSetupTunnel);
 
-    connect(ui->startTunnelButton, &QPushButton::clicked, m_tunnel, &Tunnel::requestStartTunnel);
+    connect(ui->startTunnelButton, &QPushButton::clicked, m_tunnel, &Tunnel::requestToggleTunnelStatus);
     connect(m_tunnel, &Tunnel::tunnelStatusChanged, this, &TunnelView::onTunnelStatusChanged);
+    connect(m_tunnel, &Tunnel::tunnelError, this, [=](const QString& errMsg)
+            {
+                QMessageBox::critical(this, tr("Tunnel Error"), errMsg);
+            });
 
     onTunnelStatusChanged(false);
 }

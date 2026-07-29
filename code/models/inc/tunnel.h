@@ -5,6 +5,7 @@
 #include <QVector>
 
 class QJsonObject;
+class QProcess;
 
 struct TunnelServerData
 {
@@ -43,13 +44,14 @@ public:
     QJsonObject save();
     void load(const QJsonObject& jsonDataObj);
 
-    void requestStartTunnel();
+    void requestToggleTunnelStatus();
 
 signals:
     void tunnelStatusChanged(bool running);
+    void tunnelError(const QString& errmsg);
 
 private:
     TunnelServerData m_serverData;
     QVector<ForwardData> m_forwardData;
-    bool m_tunnelIsRunning = false;
+    QProcess* m_process = nullptr;
 };

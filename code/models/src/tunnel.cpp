@@ -2,6 +2,10 @@
 
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QProcess>
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
 
 #include <QDebug>
 
@@ -23,6 +27,15 @@ Tunnel::Tunnel()
 
 Tunnel::~Tunnel()
 {
+    if (m_process)
+    {
+        m_process->disconnect();
+        m_process->kill();
+        m_process->waitForFinished();
+
+        delete m_process;
+        m_process = nullptr;
+    }
 }
 
 QJsonObject Tunnel::save()
@@ -85,9 +98,52 @@ void Tunnel::load(const QJsonObject& jsonDataObj)
     }
 }
 
-void Tunnel::requestStartTunnel()
+void Tunnel::requestToggleTunnelStatus()
 {
-    // TODO: refactor this
-    m_tunnelIsRunning = !m_tunnelIsRunning;
-    emit tunnelStatusChanged(m_tunnelIsRunning);
+    if (m_serverData.ip.isEmpty() || m_serverData.port.isEmpty() || m_serverData.userName.isEmpty() || m_forwardData.empty())
+    {
+        return;
+    }
+
+    if (m_process == nullptr)
+    {
+        m_process = new QProcess(this);
+#ifdef Q_OS_WIN
+        m_process->setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* args)
+                                                     {
+                                                         args->flags |= CREATE_NO_WINDOW;  // 关键：完全隐藏黑窗口
+                                                     });
+#endif
+
+        connect(m_process, &QProcess::readyReadStandardError, this, [=]()
+                {
+                    emit tunnelStatusChanged(false);
+                    emit tunnelError(m_process->readAllStandardError());
+                    m_process->kill();
+                });
+
+        connect(m_process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, [=](int exitCode, QProcess::ExitStatus exitStatus)
+                {
+                    emit tunnelStatusChanged(false);
+                });
+    }
+
+    QStringList arguments;
+    arguments << "-N";
+    for (const ForwardData& forward : m_forwardData)
+    {
+        arguments << "-L" << QString("%1:%2:%3").arg(forward.localPort).arg(forward.destIP).arg(forward.destPort);
+    }
+    arguments << QString("%1@%2").arg(m_serverData.userName).arg(m_serverData.ip)
+              << "-p" << m_serverData.port;
+
+    if (m_process->state() == QProcess::NotRunning)
+    {
+        m_process->start("ssh", arguments);
+        emit tunnelStatusChanged(true);
+    }
+    else
+    {
+        m_process->kill();
+    }
 }
