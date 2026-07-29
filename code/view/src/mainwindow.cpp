@@ -42,8 +42,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+#ifdef RELEASE
     this->hide();
     event->ignore();
+#else
+    QMainWindow::closeEvent(event);
+#endif
 }
 
 void MainWindow::onAddTunnel()

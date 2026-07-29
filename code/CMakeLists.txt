@@ -14,9 +14,10 @@ set_target_properties(${EXE_NAME} PROPERTIES
     WIN32_EXECUTABLE $<$<AND:$<PLATFORM_ID:Windows>,$<CONFIG:Release>>:TRUE>
 )
 
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network)
 
 target_link_libraries(${EXE_NAME} PRIVATE
     models
     view
+    $<$<CONFIG:Release>:Qt${QT_VERSION_MAJOR}::Network>
 )

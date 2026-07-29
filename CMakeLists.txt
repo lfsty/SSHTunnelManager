@@ -8,6 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(QT_VERSION_MAJOR 5)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG)
+else()
+    add_compile_definitions(RELEASE)
+endif()
+
 if(MSVC)
     add_compile_options("/utf-8")
 endif()
