@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QMessageBox>
 
+#include <LogManager.h>
 #include <tunnel.h>
 #include "tunnelsetupdialog.h"
 
@@ -25,7 +26,8 @@ TunnelView::TunnelView(QWidget* parent) : QWidget(parent),
     connect(m_tunnel, &Tunnel::tunnelStatusChanged, this, &TunnelView::onTunnelStatusChanged);
     connect(m_tunnel, &Tunnel::tunnelError, this, [=](const QString& errMsg)
             {
-                QMessageBox::critical(this, tr("Tunnel Error"), errMsg);
+                // QMessageBox::critical(this, tr("Tunnel Error"), errMsg);
+                LogManager::getInstance()->log(errMsg);
             });
 
     onTunnelStatusChanged(false);

@@ -4,10 +4,12 @@ set(MODULE_NAME models)
 
 set(SOURCES_LIST
     ${CMAKE_CURRENT_LIST_DIR}/src/tunnel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/LogManager.cpp
 )
 
 set(HEADERS_LIST
     ${CMAKE_CURRENT_LIST_DIR}/inc/tunnel.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/LogManager.h
 )
 
 add_library(${MODULE_NAME} STATIC ${SOURCES_LIST})
