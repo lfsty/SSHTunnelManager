@@ -15,6 +15,7 @@ TunnelView::TunnelView(QWidget* parent) : QWidget(parent),
                                           m_tunnel(new Tunnel)
 {
     ui->setupUi(this);
+    ui->forward_list->setVisible(false);
 
     connect(ui->deleteButton, &QPushButton::clicked, this, &TunnelView::deleteLater);
     updateViewInfo();
@@ -56,6 +57,29 @@ void TunnelView::updateViewInfo()
     ui->userNameLabel->setText(serverData.userName);
     ui->serverIPLabel->setText(serverData.ip);
     ui->serverPortLabel->setText(serverData.port);
+
+    if (!m_tunnel->getForwardData().empty())
+    {
+        ui->forward_list->clear();
+        ui->forward_list->setVisible(true);
+        for (const ForwardData& data : m_tunnel->getForwardData())
+        {
+            QString forwardInfo = QString("0.0.0.0:%1 -> %2:%3").arg(data.localPort, data.destIP, data.destPort);
+            ui->forward_list->addItem(forwardInfo);
+        }
+
+        int totalHeight = 0;
+        for (int i = 0; i < ui->forward_list->count(); ++i)
+        {
+            totalHeight += ui->forward_list->sizeHintForRow(i);
+        }
+        totalHeight += ui->forward_list->frameWidth() * 2 + 4;
+        ui->forward_list->setFixedHeight(totalHeight);
+    }
+    else
+    {
+        ui->forward_list->setVisible(false);
+    }
 }
 
 void TunnelView::onSetupTunnel()
