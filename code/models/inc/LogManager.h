@@ -1,23 +1,27 @@
 #pragma once
 
+#include <QMutex>
 #include <QObject>
+#include <QString>
 
-class QFile;
-
+// 线程安全的日志文件，同时用于承接 Qt 自身的警告输出
 class LogManager : public QObject
 {
     Q_OBJECT
 
 public:
-    static LogManager* getInstance();
+    static LogManager* instance();
 
-public:
-    void log(const QString& log);
+    QString filePath() const;
+    void log(const QString& message);
 
-private:
-    LogManager();
-    ~LogManager();
+    static void installMessageHandler();
 
 private:
-    QFile* m_file = nullptr;
+    explicit LogManager(QObject* parent = nullptr);
+
+    static QString resolveFilePath();
+
+    QString m_filePath;
+    mutable QMutex m_mutex;
 };

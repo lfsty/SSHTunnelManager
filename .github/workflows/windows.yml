@@ -7,7 +7,7 @@ on:
     branches: [ master, main ]
 
   pull_request:
-    branches: [ master, main ] 
+    branches: [ master, main ]
     types: [ opened, synchronize, reopened ]
 
   workflow_dispatch:
@@ -22,38 +22,46 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # install Qt SDK
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.8.*'
-          cache: 'true'
-  
       # Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # CMake Config
-      - name: Configure Cmake
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-      
-      # Cmake Build
-      - name: Build Project
-        run: cmake --build build --config ${{env.BUILD_TYPE}}
+      # Install Qt SDK
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.*'
+          cache: 'true'
 
-      # 添加以下内容：运行测试
+      # CMake Config
+      - name: Configure CMake
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      # CMake Build
+      - name: Build Project
+        run: cmake --build build --config ${{ env.BUILD_TYPE }}
+
       - name: Run Tests
         working-directory: ${{ github.workspace }}/build
-        run: ctest --output-on-failure --build-config ${{env.BUILD_TYPE}}
+        run: ctest --output-on-failure --build-config ${{ env.BUILD_TYPE }}
 
       - name: Package Application (Windows)
         if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
         shell: pwsh
-        env: 
+        env:
           TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && 'manual' || github.ref_name }}
         run: ./scripts/windows-pack.ps1
+
+      # 手动触发时也能下载打包结果
+      - name: Upload Manual Package
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SSHTunnelManager-windows-manual
+          path: SSHTunnelManager-windows-manual.zip
+          if-no-files-found: error
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v3
@@ -61,5 +69,6 @@ jobs:
         with:
           files: |
             SSHTunnelManager-windows-${{ github.ref_name }}.zip
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

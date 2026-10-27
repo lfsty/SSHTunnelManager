@@ -1,36 +1,93 @@
 #include "LogManager.h"
 
+#include <QDateTime>
+#include <QDir>
 #include <QFile>
-#include <QMutex>
-#include <QMutexLocker>
+#include <QFileInfo>
 
-#include <QDebug>
-
-LogManager* LogManager::getInstance()
+namespace
 {
-    static LogManager logManager;
-    return &logManager;
+constexpr const char* LOG_FILE_NAME = "log.txt";
+
+QString formatMessage(const QString& message)
+{
+    return QString("[%1] %2").arg(QDateTime::currentDateTime().toString(Qt::ISODateWithMs), message);
 }
+}  // namespace
 
-void LogManager::log(const QString& log)
+LogManager::LogManager(QObject* parent) : QObject(parent),
+                                          m_filePath(resolveFilePath())
 {
-    static QMutex _mutex;
-    QMutexLocker _locker(&_mutex);
-
-    if (m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+    const QDir dir = QFileInfo(m_filePath).absoluteDir();
+    if (!dir.exists())
     {
-        m_file->write(log.toUtf8());
-        m_file->write("\n");
-        m_file->close();
+        QDir().mkpath(dir.absolutePath());
     }
 }
 
-LogManager::LogManager()
+LogManager* LogManager::instance()
 {
-    m_file = new QFile("log.txt");
+    static LogManager manager;
+    return &manager;
 }
 
-LogManager::~LogManager()
+QString LogManager::filePath() const
 {
-    delete m_file;
+    return m_filePath;
+}
+
+void LogManager::log(const QString& message)
+{
+    if (message.isEmpty())
+    {
+        return;
+    }
+
+    QMutexLocker locker(&m_mutex);
+
+    QFile file(m_filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+    {
+        return;
+    }
+
+    file.write(formatMessage(message).toUtf8());
+    file.write("\n");
+    file.close();
+}
+
+void LogManager::installMessageHandler()
+{
+    qInstallMessageHandler([](QtMsgType type, const QMessageLogContext& context, const QString& message)
+                           {
+                               Q_UNUSED(context)
+
+                               QString level;
+                               switch (type)
+                               {
+                               case QtDebugMsg:
+                                   level = "debug";
+                                   break;
+                               case QtInfoMsg:
+                                   level = "info";
+                                   break;
+                               case QtWarningMsg:
+                                   level = "warning";
+                                   break;
+                               case QtCriticalMsg:
+                                   level = "critical";
+                                   break;
+                               case QtFatalMsg:
+                                   level = "fatal";
+                                   break;
+                               }
+
+                               instance()->log(QString("[qt:%1] %2").arg(level, message));
+                           });
+}
+
+QString LogManager::resolveFilePath()
+{
+    // 数据统一保存在程序当前工作目录
+    return QDir::current().filePath(LOG_FILE_NAME);
 }
