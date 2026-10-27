@@ -190,8 +190,6 @@ void Tunnel::start()
     m_stopping = false;
     m_process->start("ssh", arguments);
     setRunning(true);
-
-    logMessage(tr("启动隧道 %1: ssh %2").arg(title(), arguments.join(' ')));
 }
 
 void Tunnel::stop()
@@ -206,7 +204,6 @@ void Tunnel::stop()
     m_process->kill();
     m_process->waitForFinished(STOP_TIMEOUT_MS);
     setRunning(false);
-    logMessage(tr("停止隧道 %1").arg(title()));
 }
 
 void Tunnel::toggle()
